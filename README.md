@@ -1,14 +1,36 @@
-# Yomiru Manga
+<p align="center">
+  <b>📚 Yomiru Manga</b><br>
+  <sub>Ecosistema para leer manga y libros — app móvil (Expo), API, web (Astro) e ingestor, todo en un monorepo.</sub>
+</p>
 
-Monorepo del ecosistema **Yomiru** (読みる — «leer»): lector de manga y libros con app móvil (Expo), API backend, web (Astro), ingestor y paquetes compartidos.
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-20+-3fb950?style=flat&logo=node.js&logoColor=white" alt="Node.js">
+  <img src="https://img.shields.io/badge/Expo-000020?style=flat&logo=expo&logoColor=white" alt="Expo">
+  <img src="https://img.shields.io/badge/Astro-BC52EE?style=flat&logo=astro&logoColor=white" alt="Astro">
+  <img src="https://img.shields.io/badge/Fastify-000000?style=flat&logo=fastify&logoColor=white" alt="Fastify">
+  <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=flat&logo=supabase&logoColor=white" alt="Supabase">
+</p>
 
-**Repositorio:** [github.com/OnichanDevTeam/yomiru-manga](https://github.com/OnichanDevTeam/yomiru-manga)
+---
+
+## Qué hace
+
+**Yomiru** (読みる — «leer») es un monorepo con el ecosistema completo de un lector de manga y libros: la app móvil en Expo, la API backend en Fastify, el sitio web en Astro, un ingestor/worker y paquetes compartidos. Usa Supabase (Postgres), Redis, R2 (Cloudflare) y enriquece el catálogo con MyAnimeList.
+
+## Funcionalidades
+
+- **App móvil** (Expo) para leer manga y libros.
+- **API backend** (Fastify) con tests.
+- **Web** (Astro) con SSR (adaptadores Vercel y Cloudflare).
+- **Ingestor** que descubre y espeja capítulos de fuentes externas.
+- Catálogo enriquecido con **MyAnimeList**.
+- Paquetes compartidos: `db` (Drizzle), `shared` y `r2`.
 
 ## Requisitos
 
-- **Node.js** ≥ 20 (recomendado: la versión en [`.nvmrc`](./.nvmrc))
-- **npm** (workspaces)
-- **Docker** (opcional, para Redis: `docker compose`)
+- **Node.js** ≥ 20 (ver [`.nvmrc`](./.nvmrc)).
+- **npm** (workspaces).
+- **Docker** (opcional, para Redis).
 
 ## Instalación
 
@@ -18,96 +40,47 @@ cd yomiru-manga
 npm install
 ```
 
-Copia los `.env` que necesite cada app o paquete (por ejemplo variables de Supabase y API en la app móvil) según la documentación interna de cada workspace. No subas secretos al repositorio.
-
-## Scripts útiles (raíz)
+## Scripts principales (raíz)
 
 | Comando | Descripción |
-|--------|-------------|
-| `npm run mobile` | Servidor de desarrollo Expo (`@yomiru/mobile`) |
+|---------|-------------|
+| `npm run mobile` | Dev de la app Expo (`@yomiru/mobile`) |
 | `npm run backend` | Backend (`@yomiru/backend`) |
-| `npm run backend:lan` | Backend escuchando en `0.0.0.0` |
-| `npm run web` | Sitio Astro en el puerto 3000 (`@yomiru/web`) |
-| `npm run web:build` | Build de producción del sitio web (adaptador **Vercel**) |
-| `npm run web:build:cf` | Build para **Cloudflare Pages** (`astro.cloudflare.mjs`) |
-| `npm run shared:build` | Compila `@yomiru/shared` |
-| `npm run db:generate` / `db:migrate` / `db:studio` | Tareas de Drizzle/DB (`@yomiru/db`) |
-| `npm run ingestor` / `ingestor:dev` | Worker / dev del ingestor |
+| `npm run web` | Sitio Astro en el puerto 3000 |
+| `npm run web:build` | Build web para **Vercel** |
+| `npm run web:build:cf` | Build web para **Cloudflare Pages** |
+| `npm run ingestor` | Worker del ingestor |
 | `npm run redis:up` | Levanta Redis con Docker Compose |
-| `npm run typecheck` | Typecheck en workspaces que lo expongan |
-| `npm run test:backend` | Tests del backend |
-
-## Datos locales
-
-La carpeta `storage/` (caché, logs, artefactos grandes) está ignorada por Git y no se sube al remoto.
-
-## Despliegue en Vercel (`apps/web`)
-
-El sitio Astro usa SSR (`output: 'server'`) y el adaptador **`@astrojs/vercel`**. El build de producción es `npm run web:build` desde la raíz del monorepo.
-
-### En el dashboard de Vercel
-
-1. **New Project** → importa el repo de GitHub.
-2. **Root Directory:** `apps/web` (así Vercel detecta Astro y `astro.config.mjs`).
-3. **Install Command** (workspaces en la raíz del repo):
-
-   `cd ../.. && npm install`
-
-4. **Build Command:**
-
-   `cd ../.. && npm run web:build`
-
-5. **Node.js:** en *Settings → Environment Variables* añade `NODE_VERSION` = `22` (o la misma que [`.nvmrc`](./.nvmrc)), alineada con `engines` de `@yomiru/web`.
-
-### Variables de entorno (producción)
-
-Configúralas en Vercel para el runtime del servidor:
-
-| Variable | Uso |
-|----------|-----|
-| `DATABASE_URL` | Postgres (p. ej. Supabase); obligatoria para el catálogo y páginas que consultan la BD. |
-| `R2_PUBLIC_URL` | URL pública del bucket/CDN; si está definida, las imágenes van directo al CDN. |
-| `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` | Necesarias si sirves media vía R2 sin URL pública (proxy `/media/...`). |
-| `ADMIN_SECRET` | Autenticación de rutas `/admin` y APIs de administración. |
-
-Tras el primer despliegue, revisa los logs de la función serverless si algo falla al conectar a la BD o a R2.
-
-## Despliegue en Cloudflare Pages (`apps/web`)
-
-Alternativa al plan de pago de Vercel con repos privados de organización: el mismo proyecto tiene un segundo config **`astro.cloudflare.mjs`** con **`@astrojs/cloudflare`**.
-
-### En el dashboard de Cloudflare (Pages)
-
-1. **Workers & Pages** → **Create** → **Connect to Git** y elige el repositorio (personal o el que permita el plan gratuito).
-2. **Root directory:** déjalo **vacío** o **`.`** (raíz del repositorio). **No pongas solo `apps/web`:** si la raíz es `apps/web`, `npm install` no instala bien los workspaces (`@yomiru/db`, etc.) y el build falla.
-3. **Build configuration:**
-   - **Framework preset:** `None` (recomendado para monorepos).
-   - **Install command:** `npm install` (por defecto; debe ejecutarse en la raíz del repo).
-   - **Build command:** `npm run web:build:cf`
-   - **Build output directory:** `apps/web/dist`
-4. Si por alguna razón **tienes** que usar **Root directory = `apps/web`**, entonces el **Install command** tiene que ser `cd ../.. && npm install` y el **Build command** `npm run web:build:cf` (ese script también existe en `apps/web/package.json` como alias al build de Cloudflare).
-5. **Environment variables:** las mismas que en Vercel (`DATABASE_URL`, `R2_*`, `ADMIN_SECRET`, `R2_PUBLIC_URL`, etc.) en el entorno **Production** (y Preview si quieres).
-
-Node: en *Settings → Environment variables* puedes fijar `NODE_VERSION` = `22` si el build lo pide.
-
-### Avisos importantes (Cloudflare Workers)
-
-- El runtime **no es Node completo**: rutas que usan **Postgres** o **R2 con el SDK AWS** pueden necesitar pruebas en producción. Si Postgres falla, Cloudflare ofrece **[Hyperdrive](https://developers.cloudflare.com/hyperdrive/)** para conectar a bases SQL desde Workers.
-- El build puede advertir por **sesiones / KV** (`SESSION`): si no usas sesiones de Astro con KV, suele ignorarse; si hace falta, crea un namespace KV en Cloudflare y enlázalo como te indique la documentación del adaptador.
-- El build por defecto sigue siendo **`npm run web:build`** (Vercel). Cloudflare usa **`npm run web:build:cf`**.
+| `npm run db:generate` / `db:migrate` | Tareas de Drizzle |
 
 ## Estructura
 
-- `apps/mobile` — App React Native (Expo)
-- `apps/backend` — API (Fastify)
-- `apps/web` — Frontend Astro
-- `apps/ingestor` — Ingestor / worker
-- `packages/db`, `packages/shared`, `packages/r2` — Código compartido y datos
+```
+apps/mobile     App React Native (Expo)
+apps/backend    API (Fastify)
+apps/web        Frontend Astro
+apps/ingestor   Ingestor / worker
+packages/db     Drizzle + esquema
+packages/shared Código compartido
+packages/r2     Acceso a Cloudflare R2
+```
 
-## Licencia y autor
+## Despliegue
 
-Proyecto privado del equipo. Contacto: **Anthoni Rivera** · [anthoniriv01@gmail.com](mailto:anthoniriv01@gmail.com).
+El sitio web (`apps/web`) usa SSR (`output: 'server'`) con dos adaptadores:
+
+- **Vercel**: root directory `apps/web`, build `cd ../.. && npm run web:build`.
+- **Cloudflare Pages**: build `npm run web:build:cf`, output `apps/web/dist`.
+
+### Variables de entorno (producción)
+
+| Variable | Uso |
+|----------|-----|
+| `DATABASE_URL` | Postgres (Supabase) para catálogo |
+| `R2_PUBLIC_URL` | URL pública del CDN de imágenes |
+| `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` | Media vía R2 sin URL pública |
+| `ADMIN_SECRET` | Auth de rutas `/admin` |
 
 ---
 
-*Onichan Dev Team*
+<p align="center"><sub>Proyecto privado de <b>Onichan Dev Team</b> · <a href="mailto:anthoniriv01@gmail.com">anthoniriv01@gmail.com</a></sub></p>
