@@ -174,7 +174,7 @@ export class CapibaraProvider implements SourceProvider {
       let totalPages = 1;
       while (page <= totalPages) {
         const body = await getJson<ListingResponse>(
-          `/api/manga-custom?order=latest&limit=100&page=${page}&nsfw=true`,
+          `/api/manga-custom?order=latest&limit=100&page=${page}`,
           { organization: scan.id },
         );
         totalPages = body.data.maxPage || 1;
