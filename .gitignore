@@ -17,9 +17,10 @@ storage/
 # Salida del adaptador Astro → Vercel (regenerable)
 .vercel/
 .wrangler/
+.codegraph/
 .idea/
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
-tools/data/*.json
+tools/data/
 .vercel

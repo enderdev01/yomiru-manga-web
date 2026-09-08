@@ -90,7 +90,7 @@ async function listScanMangas(scanSlug: string): Promise<CapibaraEntry[]> {
         maxPage: number;
       };
     }>(
-      `/api/manga-custom?order=latest&limit=100&page=${page}&nsfw=true`,
+      `/api/manga-custom?order=latest&limit=100&page=${page}`,
       scanSlug,
     );
     max = body.data.maxPage || 1;
